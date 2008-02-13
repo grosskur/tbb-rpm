@@ -1,0 +1,312 @@
+diff -urp tbb20_20070927oss_src/src/test/harness_memory.h tbb20_20070927oss_src.pm3/src/test/harness_memory.h
+--- tbb20_20070927oss_src/src/test/harness_memory.h	2007-09-28 22:13:25.000000000 +0200
++++ tbb20_20070927oss_src.pm3/src/test/harness_memory.h	2007-12-19 20:00:49.000000000 +0100
+@@ -59,7 +59,7 @@ static size_t GetMemoryUsage() { 
+     size_t pagesize = getpagesize();
+     ASSERT( statsfile, NULL );
+     long total_mem;
+-    fscanf(statsfile,"%lu",&total_mem);
++    ASSERT( fscanf(statsfile,"%lu",&total_mem) == 1, NULL );
+     fclose(statsfile);
+     return total_mem*pagesize;
+ #elif __APPLE__
+diff -urp tbb20_20070927oss_src.orig/src/test/test_concurrent_hash_map.cpp tbb20_20070927oss_src/src/test/test_concurrent_hash_map.cpp
+--- tbb20_20070927oss_src.orig/src/test/test_concurrent_hash_map.cpp	2008-01-31 16:03:16.000000000 +0100
++++ tbb20_20070927oss_src/src/test/test_concurrent_hash_map.cpp	2008-01-31 16:04:29.000000000 +0100
+@@ -177,7 +177,7 @@ public:
+ };
+ 
+ template<typename Op>
+-void DoConcurrentOperations( MyTable& table, int n, char* what, int nthread ) {
++void DoConcurrentOperations( MyTable& table, int n, char const* what, int nthread ) {
+     if( Verbose ) 
+         printf("testing %s with %d threads\n",what,nthread);
+     tbb::tick_count t0 = tbb::tick_count::now();
+diff -urp tbb20_20070927oss_src/include/tbb/concurrent_hash_map.h tbb20_20070927oss_src.ORIG/include/tbb/concurrent_hash_map.h
+--- tbb20_20070927oss_src.orig/include/tbb/concurrent_hash_map.h	2008-02-08 17:17:13.000000000 +0100
++++ tbb20_20070927oss_src/include/tbb/concurrent_hash_map.h	2008-02-08 19:04:49.000000000 +0100
+@@ -584,7 +584,7 @@ bool concurrent_hash_map<Key,T,HashCompa
+                 __TBB_ASSERT( op!=op_insert, NULL ); 
+                 goto done;
+             }
++            __TBB_ASSERT( (s.my_physical_size&(s.my_physical_size-1))==0, NULL );
+-            __TBB_ASSERT( (s.my_physical_size&s.my_physical_size-1)==0, NULL );
+             chain& c = s.get_chain(h,n_segment_bits);
+             chain_mutex_t::scoped_lock chain_lock( c.mutex, /*write=*/false );
+             b = search_list(key,c);
+diff -urp tbb20_20070927oss_src.orig/src/test/test_model_plugin.cpp tbb20_20070927oss_src/src/test/test_model_plugin.cpp
+--- tbb20_20070927oss_src.orig/src/test/test_model_plugin.cpp   2008-01-31 16:03:16.000000000 +0100
++++ tbb20_20070927oss_src/src/test/test_model_plugin.cpp        2008-01-31 16:18:43.000000000 +0100
+@@ -97,7 +97,7 @@ void plugin_call(int maxthread)
+ 
+ extern "C" void plugin_call(int);
+ 
+-void report_error_in(char* function_name)
++void report_error_in(char const* function_name)
+ {
+ #if _WIN32 || _WIN64
+     char* message;
+@@ -141,9 +141,9 @@ int main(int argc, char* argv[])
+   }
+ #else
+ #if __APPLE__
+-  char *dllname = "test_model_plugin.dylib";
++  char const*dllname = "test_model_plugin.dylib";
+ #else
+-  char *dllname = "test_model_plugin.so";
++  char const*dllname = "test_model_plugin.so";
+ #endif
+   void* hLib = dlopen( dllname, RTLD_LAZY ); 
+   if (hLib==NULL){
+diff -urp tbb20_20070927oss_src.orig/src/test/test_yield.cpp tbb20_20070927oss_src/src/test/test_yield.cpp
+--- tbb20_20070927oss_src.orig/src/test/test_yield.cpp	2008-01-31 17:01:07.000000000 +0100
++++ tbb20_20070927oss_src/src/test/test_yield.cpp	2008-01-31 17:01:13.000000000 +0100
+@@ -63,7 +63,7 @@ struct RoundRobin {
+     }
+ };
+ 
+-int main( long argc, char* argv[] ) {
++int main( int argc, char* argv[] ) {
+     // Set defaults
+     MaxThread = MinThread = 3;
+     ParseCommandLine( argc, argv );
+diff -urp tbb20_20070927oss_src.orig/src/test/test_parallel_scan.cpp tbb20_20070927oss_src/src/test/test_parallel_scan.cpp
+--- tbb20_20070927oss_src.orig/src/test/test_parallel_scan.cpp	2008-01-31 16:33:43.000000000 +0100
++++ tbb20_20070927oss_src/src/test/test_parallel_scan.cpp	2008-01-31 16:43:05.000000000 +0100
+@@ -128,7 +128,7 @@ public:
+         else
+             printf("%d computing %s [%ld..%ld) [%ld..%ld)\n",id,tag.is_final_scan()?"final":"lookahead",my_range.begin(),my_range.end(),r.begin(),r.end());
+ #endif /* PRINT_DEBUG */
+-        ASSERT( !tag.is_final_scan() || my_range.begin()==0 && my_range.end()==r.begin() || my_range.empty() && r.begin()==0, NULL );
++        ASSERT( !tag.is_final_scan() || (my_range.begin()==0 && my_range.end()==r.begin()) || (my_range.empty() && r.begin()==0), NULL );
+         for( long i=r.begin(); i<r.end(); ++i ) {
+             my_total += my_array[i];
+             if( tag.is_final_scan() ) {
+diff -urp tbb20_20070927oss_src.orig/src/tbbmalloc/MemoryAllocator.cpp tbb20_20070927oss_src/src/tbbmalloc/MemoryAllocator.cpp
+--- tbb20_20070927oss_src.orig/src/tbbmalloc/MemoryAllocator.cpp	2008-01-31 13:47:01.000000000 +0100
++++ tbb20_20070927oss_src/src/tbbmalloc/MemoryAllocator.cpp	2008-01-31 13:49:32.000000000 +0100
+@@ -179,13 +179,11 @@ static void* getMemory (size_t bytes)
+ 
+ static void returnMemory(void *area, size_t bytes)
+ {
+-    int retcode = UnmapMemory(area, bytes);
++    if (UnmapMemory(area, bytes)) {
+ #ifdef MALLOC_TRACE
+-    if (retcode) {
+         TRACEF("ScalableMalloc trace - returnMemory unsuccess for %p; perhaps it has already been freed or was never allocated.\n", area);
+-    }
+ #endif
+-    return;
++    }
+ }
+ 
+ /********* End memory acquisition code ********************************/
+diff -urp tbb20_20070927oss_src.orig/src/tbbmalloc/MemoryAllocator.cpp tbb20_20070927oss_src/src/tbbmalloc/MemoryAllocator.cpp
+--- tbb20_20070927oss_src.orig/src/tbbmalloc/MemoryAllocator.cpp	2008-01-31 14:07:33.000000000 +0100
++++ tbb20_20070927oss_src/src/tbbmalloc/MemoryAllocator.cpp	2008-01-31 14:10:03.000000000 +0100
+@@ -32,7 +32,7 @@
+ #ifdef MALLOC_TRACE
+ #define TRACEF printf
+ #else
+-static inline int TRACEF(char *arg, ...)
++static inline int TRACEF(char const* arg, ...)
+ {
+     return 0;
+ }
+@@ -683,12 +683,11 @@ static void outofTLSBin (Bin* bin, Block
+ static Bin* initMallocTLS (void)
+ {
+     Bin* tls;
+-    int i;
+     MALLOC_ASSERT( tlsSize >= sizeof(Bin) * numBlockBins, ASSERT_TEXT );
+     tls = (Bin*) bootStrapMalloc(tlsSize);
+     /* the block contains zeroes after bootStrapMalloc, so bins are initialized */
+ #ifdef MALLOC_DEBUG
+-    for (i = 0; i < numBlockBinLimit; i++) {
++    for (int i = 0; i < numBlockBinLimit; i++) {
+         MALLOC_ASSERT( tls[i].activeBlk == 0, ASSERT_TEXT );
+         MALLOC_ASSERT( tls[i].mailbox == 0, ASSERT_TEXT );
+     }
+diff -urp tbb20_20070927oss_src.orig/src/tbb/concurrent_vector.cpp tbb20_20070927oss_src/src/tbb/concurrent_vector.cpp
+--- tbb20_20070927oss_src.orig/src/tbb/concurrent_vector.cpp	2008-01-31 14:07:33.000000000 +0100
++++ tbb20_20070927oss_src/src/tbb/concurrent_vector.cpp	2008-01-31 14:21:46.000000000 +0100
+@@ -31,6 +31,7 @@
+ #include <stdexcept>
+ #include "itt_notify.h"
+ #include "tbb/task.h"
++#include <string.h>
+ 
+ 
+ namespace tbb {
+diff -urp tbb20_20070927oss_src.orig/include/tbb/concurrent_vector.h tbb20_20070927oss_src/include/tbb/concurrent_vector.h
+--- tbb20_20070927oss_src.orig/include/tbb/concurrent_vector.h	2008-01-31 15:39:02.000000000 +0100
++++ tbb20_20070927oss_src/include/tbb/concurrent_vector.h	2008-01-31 15:48:04.000000000 +0100
+@@ -280,7 +280,7 @@ public: // workaround for MSVC
+             size_t k = ++my_index;
+             if( my_item ) {
+                 // Following test uses 2's-complement wizardry
+-                if( (k& k-2)==0 ) {
++                if( (k& (k-2))==0 ) {
+                     // k is a power of two that is at least k-2
+                     my_item= NULL;
+                 } else {
+@@ -296,7 +296,7 @@ public: // workaround for MSVC
+             size_t k = my_index--;
+             if( my_item ) {
+                 // Following test uses 2's-complement wizardry
+-                if( (k& k-2)==0 ) {
++                if( (k& (k-2))==0 ) {
+                     // k is a power of two that is at least k-2  
+                     my_item= NULL;
+                 } else {
+diff -urp tbb20_20070927oss_src.orig/src/tbbmalloc/Statistics.h tbb20_20070927oss_src/src/tbbmalloc/Statistics.h
+--- tbb20_20070927oss_src.orig/src/tbbmalloc/Statistics.h	2008-01-31 14:07:33.000000000 +0100
++++ tbb20_20070927oss_src/src/tbbmalloc/Statistics.h	2008-01-31 14:16:12.000000000 +0100
+@@ -66,7 +66,7 @@ static inline int STAT_increment(int thr
+     return ++(statistic[thread][bin].counter[ctr]);
+ }
+ #else
+-#define STAT_increment(a,b,c) ((int)0)
++#define STAT_increment(a,b,c) ((void)0)
+ #endif
+ 
+ static inline void STAT_print(int thread)
+diff -urp tbb20_20070927oss_src.orig/src/tbb/task.cpp tbb20_20070927oss_src/src/tbb/task.cpp
+--- tbb20_20070927oss_src.orig/src/tbb/task.cpp	2008-01-31 15:22:32.000000000 +0100
++++ tbb20_20070927oss_src/src/tbb/task.cpp	2008-01-31 15:28:11.000000000 +0100
+@@ -393,7 +393,7 @@ static inline bool IsGenuineIntel() {
+     bool result = true;
+ #if defined(__TBB_cpuid)
+     char info[16];
+-    char *genuine_string = "GenuntelineI";
++    static char const genuine_string[] = "GenuntelineI";
+     __TBB_x86_cpuid( reinterpret_cast<int *>(info), 0 );
+     // The multibyte chars below spell "GenuineIntel".
+     //if( info[1]=='uneG' && info[3]=='Ieni' && info[2]=='letn' ) {
+diff -urp tbb20_20070927oss_src.orig/src/tbb/pipeline.cpp tbb20_20070927oss_src/src/tbb/pipeline.cpp
+--- tbb20_20070927oss_src.orig/src/tbb/pipeline.cpp	2008-01-31 15:08:02.000000000 +0100
++++ tbb20_20070927oss_src/src/tbb/pipeline.cpp	2008-01-31 15:14:19.000000000 +0100
+@@ -62,6 +62,10 @@ class ordered_buffer {
+     //! Initial size for "array"
+     /** Must be a power of 2 */
+     static const size_type initial_buffer_size = 4;
++
++    static inline size_type getindex(size_type token, size_type size) {
++        return token & (size - 1);
++    }
+ public:
+     //! Construct empty buffer.
+     ordered_buffer() : array(NULL), array_size(0), low_token(0) {
+@@ -92,7 +96,7 @@ public:
+                 if( token-low_token>=array_size ) 
+                     grow( token-low_token+1 );
+                 ITT_NOTIFY( sync_releasing, this );
+-                array[token&array_size-1] = &putter;
++                array[getindex(token, array_size)] = &putter;
+             }
+         }
+         return result;
+@@ -106,7 +110,7 @@ public:
+             spin_mutex::scoped_lock lock( array_mutex );
+             if( token==low_token ) {
+                 // Wake the next task
+-                task*& item = array[++low_token & array_size-1];
++	        task*& item = array[getindex(++low_token, array_size)];
+                 ITT_NOTIFY( sync_acquired, this );
+                 wakee = item;
+                 item = NULL;
+@@ -129,7 +133,7 @@ void ordered_buffer::grow( size_type min
+         new_array[i] = NULL;
+     long t=low_token;
+     for( size_type i=0; i<old_size; ++i, ++t )
+-        new_array[t&new_size-1] = old_array[t&old_size-1];
++        new_array[getindex(t, new_size)] = old_array[getindex(t, old_size)];
+     array = new_array;
+     array_size = new_size;
+     if( old_array )
+diff -urp tbb20_20070927oss_src/src/tbb/concurrent_queue.cpp tbb20_20070927oss_src.pm/src/tbb/concurrent_queue.cpp
+--- tbb20_20070927oss_src/src/tbb/concurrent_queue.cpp	2007-09-28 22:13:24.000000000 +0200
++++ tbb20_20070927oss_src.pm/src/tbb/concurrent_queue.cpp	2008-01-31 14:59:23.000000000 +0100
+@@ -135,6 +135,10 @@ public:
+ 
+     //! Value for effective_capacity that denotes unbounded queue.
+     static const ptrdiff_t infinite_capacity = ptrdiff_t(~size_t(0)/2);
++
++    static inline size_t getindex(ticket k, concurrent_queue_base const& base) {
++        return ((k/concurrent_queue_rep::n_queue) & (base.items_per_page-1));
++    }
+ };
+ 
+ #if _MSC_VER && !defined(__INTEL_COMPILER)
+@@ -149,7 +153,7 @@ public:
+ void micro_queue::push( const void* item, ticket k, concurrent_queue_base& base ) {
+     k &= -concurrent_queue_rep::n_queue;
+     page* p = NULL;
+-    size_t index = (k/concurrent_queue_rep::n_queue & base.items_per_page-1);
++    size_t index = concurrent_queue_rep::getindex(k, base);
+     if( !index ) {
+         size_t n = sizeof(page) + base.items_per_page*base.item_size;
+         p = static_cast<page*>(operator new( n ));
+@@ -181,7 +185,7 @@ bool micro_queue::pop( void* dst, ticket
+     SpinwaitWhileEq( tail_counter, k );
+     page& p = *head_page;
+     __TBB_ASSERT( &p, NULL );
+-    size_t index = (k/concurrent_queue_rep::n_queue & base.items_per_page-1);
++    size_t index = concurrent_queue_rep::getindex(k, base);
+     bool success = false; 
+     {
+         pop_finalizer finalizer( *this, k+concurrent_queue_rep::n_queue, index==base.items_per_page-1 ? &p : NULL ); 
+@@ -319,7 +323,7 @@ public:
+         else {
+             concurrent_queue_base::page* p = array[concurrent_queue_rep::index(k)];
+             __TBB_ASSERT(p,NULL);
+-            size_t i = k/concurrent_queue_rep::n_queue & my_queue.items_per_page-1;
++	    size_t i = concurrent_queue_rep::getindex(k, my_queue);
+             return static_cast<unsigned char*>(static_cast<void*>(p+1)) + my_queue.item_size*i;
+         }
+     }
+@@ -351,7 +355,7 @@ void concurrent_queue_iterator_base::adv
+     size_t k = my_rep->head_counter;
+     const concurrent_queue_base& queue = my_rep->my_queue;
+     __TBB_ASSERT( my_item==my_rep->choose(k), NULL );
+-    size_t i = k/concurrent_queue_rep::n_queue & queue.items_per_page-1;
++    size_t i = concurrent_queue_rep::getindex(k, queue);
+     if( i==queue.items_per_page-1 ) {
+         concurrent_queue_base::page*& root = my_rep->array[concurrent_queue_rep::index(k)];
+         root = root->next;
+diff -urp tbb20_20070927oss_src.orig/include/tbb/concurrent_hash_map.h tbb20_20070927oss_src/include/tbb/concurrent_hash_map.h
+--- tbb20_20070927oss_src.orig/include/tbb/concurrent_hash_map.h	2008-01-31 16:03:16.000000000 +0100
++++ tbb20_20070927oss_src/include/tbb/concurrent_hash_map.h	2008-01-31 16:10:02.000000000 +0100
+@@ -328,7 +328,7 @@ private:
+     };
+ 
+     segment& get_segment( hashcode_t hashcode ) {
+-        return my_segment[hashcode&n_segment-1];
++        return my_segment[hashcode&(n_segment-1)];
+     }
+         
+     HashCompare my_hash_compare;
+diff -urp tbb20_20070927oss_src.orig/include/tbb/parallel_scan.h tbb20_20070927oss_src/include/tbb/parallel_scan.h
+--- tbb20_20070927oss_src.orig/include/tbb/parallel_scan.h	2008-01-31 16:19:28.000000000 +0100
++++ tbb20_20070927oss_src/include/tbb/parallel_scan.h	2008-01-31 16:30:17.000000000 +0100
+@@ -232,7 +232,7 @@ namespace internal {
+             is_final = false;
+         }
+         task* next_task = NULL;
+-        if( is_right_child && !treat_as_stolen || partitioner.should_execute_range(range, *this) ) {
++        if( (is_right_child && !treat_as_stolen) || partitioner.should_execute_range(range, *this) ) {
+             if( is_final )
+                 (body->body)( range, final_scan_tag() );
+             else if( sum )
+diff -urp tbb20_20070927oss_src/src/tbb/cache_aligned_allocator.cpp tbb20_20070927oss_src.pm/src/tbb/cache_aligned_allocator.cpp
+--- tbb20_20070927oss_src/src/tbb/cache_aligned_allocator.cpp	2007-09-28 22:13:24.000000000 +0200
++++ tbb20_20070927oss_src.pm/src/tbb/cache_aligned_allocator.cpp	2008-02-08 12:51:36.000000000 +0100
+@@ -129,7 +129,7 @@ void* NFS_Allocate( size_t n, size_t ele
+     using namespace internal;
+     size_t m = NFS_LineSize;
+     __TBB_ASSERT( m<=NFS_MaxLineSize, "illegal value for NFS_LineSize" );
+-    __TBB_ASSERT( (m & m-1)==0, "must be power of two" );
++    __TBB_ASSERT( (m & (m-1))==0, "must be power of two" );
+     size_t bytes = n*element_size;
+     unsigned char* base;
+     if( bytes<n || bytes+m<bytes || !(base=(unsigned char*)(bytes>=BigSize?malloc(m+bytes):(*MallocHandler)(m+bytes))) ) {
