@@ -1,23 +1,26 @@
-%define releasedate 20070927
-%define sourcebasename tbb20_%{releasedate}oss_src
-%define sourcefilename %{sourcebasename}.tar.gz
+%define releasedate 20080605
+%define major 2
+%define minor 1
+%define sourcebasename tbb%{major}%{minor}_%{releasedate}oss
+%define sourcefilename %{sourcebasename}_src.tgz
 
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Name: tbb
-Version: 2.0
-Release: 4.%{releasedate}%{?dist}
+Version: %{major}.%{minor}
+Release: 1.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 URL: http://threadingbuildingblocks.org/
 Source: http://threadingbuildingblocks.org/uploads/77/84/2.0/%{sourcefilename}
-Source2: http://cache-www.intel.com/cd/00/00/30/11/301111_301111.pdf
-Source3: http://cache-www.intel.com/cd/00/00/30/11/301114_301114.pdf
-Source4: http://cache-www.intel.com/cd/00/00/30/11/301132_301132.pdf
-Source5: http://cache-www.intel.com/cd/00/00/31/26/312687_312687.pdf
-Patch0: tbb-2.0-20070927-soname.patch
+# RPM can't handle spaces in specs, so rename official files.  Get rid
+# of "(Open Source)" suffix while at it.
+#  http://www.threadingbuildingblocks.org/uploads/81/91/Latest Open Source Documentation/Getting Started (Open Source).pdf
+Source2: Getting_Started.pdf
+#  http://www.threadingbuildingblocks.org/uploads/81/91/Latest Open Source Documentation/Reference Manual (Open Source).pdf
+Source3: Reference_Manual.pdf
+#  http://www.threadingbuildingblocks.org/uploads/81/91/Latest Open Source Documentation/Tutorial (Open Source).pdf
+Source4: Tutorial.pdf
 Patch1: tbb-2.0-20070927-cxxflags.patch
-Patch2: tbb-2.0-20070927-parallel-make.patch
-Patch3: tbb-2.0-20070927-gcc43.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libstdc++-devel
 # We need "arch" and "hostname" binaries:
@@ -57,33 +60,22 @@ C++ library.
 
 %prep
 %setup -q -n %{sourcebasename}
-%patch0 -p1
 %patch1 -p1
-%patch2 -p1
-%patch3 -p1
 
 %build
-# Currently we build TBB in debug mode.  This overrides some of the
-# CXXFLAGS passed in, namely turns off optimizations.  Either GCC 4.3
-# or TBB have a bug that prevents TBB to compile correctly on anything
-# above -O0.  As soon as upstream has this situation resolved, release
-# builds can be reintroduced.
-make %{?_smp_mflags} CXXFLAGS="$RPM_OPT_FLAGS" DEBUG_SUFFIX= tbb_build_prefix=obj debug
+make %{?_smp_mflags} CXXFLAGS="$RPM_OPT_FLAGS" tbb_build_prefix=obj
 
-cp -p %{SOURCE2} %{SOURCE3} %{SOURCE4} %{SOURCE5} .
-ln -s `basename %{SOURCE2}` getting_started_guide.pdf
-ln -s `basename %{SOURCE3}` reference_manual.pdf
-ln -s `basename %{SOURCE4}` tutorial.pdf
-ln -s `basename %{SOURCE5}` release_notes.pdf
+cp -p "%{SOURCE2}" "%{SOURCE3}" "%{SOURCE4}" .
 
 %install
 rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT/%{_libdir}
+mkdir -p $RPM_BUILD_ROOT/%{_includedir}
 
-pushd build/obj_debug
+pushd build/obj_release
     for file in libtbb{,malloc}; do
-        install -p -D -m 755 ${file}.so $RPM_BUILD_ROOT/%{_libdir}/$file.so.2.0
-        ln -s $file.so.2.0 $RPM_BUILD_ROOT/%{_libdir}/$file.so.2
-        ln -s $file.so.2.0 $RPM_BUILD_ROOT/%{_libdir}/$file.so
+        install -p -D -m 755 ${file}.so.2 $RPM_BUILD_ROOT/%{_libdir}
+        ln -s $file.so.2 $RPM_BUILD_ROOT/%{_libdir}/$file.so
     done
 popd
 
@@ -103,7 +95,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %files
 %defattr(-,root,root,-)
 %doc COPYING
-%{_libdir}/*.so.2.0
+%doc doc/Release_Notes.txt
 %{_libdir}/*.so.2
 
 %files devel
@@ -113,12 +105,15 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files doc
 %defattr(-,root,root,-)
-%doc 301111_301111.pdf getting_started_guide.pdf
-%doc 301114_301114.pdf reference_manual.pdf
-%doc 301132_301132.pdf tutorial.pdf
-%doc 312687_312687.pdf release_notes.pdf
+%doc Getting_Started.pdf
+%doc Reference_Manual.pdf
+%doc Tutorial.pdf
 
 %changelog
+* Fri Jun 13 2008 Petr Machata <pmachata@redhat.com> - 2.1-1.20080605
+- New upstream 2.1
+  - Drop soname patch, parallel make patch, and GCC 4.3 patch
+
 * Wed Feb 13 2008 Petr Machata <pmachata@redhat.com> - 2.0-4.20070927
 - Review fixes
   - Use updated URL
