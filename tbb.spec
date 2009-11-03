@@ -1,26 +1,31 @@
-%define releasedate 20080605
+%define releasedate 20090809
 %define major 2
-%define minor 1
+%define minor 2
 %define sourcebasename tbb%{major}%{minor}_%{releasedate}oss
 %define sourcefilename %{sourcebasename}_src.tgz
+
+%define source_2 Getting_Started.pdf
+%define source_3 Reference.pdf
+%define source_4 Tutorial.pdf
 
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Name: tbb
 Version: %{major}.%{minor}
-Release: 3.%{releasedate}%{?dist}
+Release: 1.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 URL: http://threadingbuildingblocks.org/
-Source: http://threadingbuildingblocks.org/uploads/77/84/2.0/%{sourcefilename}
-# RPM can't handle spaces in specs, so rename official files.  Get rid
-# of "(Open Source)" suffix while at it.
-#  http://www.threadingbuildingblocks.org/uploads/81/91/Latest Open Source Documentation/Getting Started (Open Source).pdf
-Source2: Getting_Started.pdf
-#  http://www.threadingbuildingblocks.org/uploads/81/91/Latest Open Source Documentation/Reference Manual (Open Source).pdf
-Source3: Reference_Manual.pdf
-#  http://www.threadingbuildingblocks.org/uploads/81/91/Latest Open Source Documentation/Tutorial (Open Source).pdf
-Source4: Tutorial.pdf
-Patch1: tbb-2.0-20070927-cxxflags.patch
+Source: http://threadingbuildingblocks.org/uploads/77/142/2.2/%{sourcefilename}
+# RPM can't handle spaces in specs, so don't include full URL.  Each
+# of the following sources was downloaded from:
+#   http://www.threadingbuildingblocks.org/uploads/81/91/Latest Open Source Documentation/
+# Unfortunately, because they regularly replace the "Latest"
+# documentation with what's actually Latest at that point, these
+# sources may no longer be available at that link.
+Source2: %{source_2}
+Source3: %{source_3}
+Source4: %{source_4}
+Patch1: tbb-2.2-20090809-cxxflags.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libstdc++-devel
 # We need "arch" and "hostname" binaries:
@@ -105,11 +110,15 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files doc
 %defattr(-,root,root,-)
-%doc Getting_Started.pdf
-%doc Reference_Manual.pdf
-%doc Tutorial.pdf
+%doc %{source_2}
+%doc %{source_3}
+%doc %{source_4}
 
 %changelog
+* Tue Nov  3 2009 Petr Machata <pmachata@redhat.com> - 2.2-1.20090809
+- New upstream 2.2
+- Resolves: #521571
+
 * Sun Jul 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.1-3.20080605
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
