@@ -11,7 +11,7 @@
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Name: tbb
 Version: %{major}.%{minor}
-Release: 1.%{releasedate}%{?dist}
+Release: 2.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 URL: http://threadingbuildingblocks.org/
@@ -26,6 +26,7 @@ Source2: %{source_2}
 Source3: %{source_3}
 Source4: %{source_4}
 Patch1: tbb-2.2-20090809-cxxflags.patch
+Patch2: tbb-2.2-mfence.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libstdc++-devel
 # We need "arch" and "hostname" binaries:
@@ -66,6 +67,7 @@ C++ library.
 %prep
 %setup -q -n %{sourcebasename}
 %patch1 -p1
+%patch2 -p1
 
 %build
 make %{?_smp_mflags} CXXFLAGS="$RPM_OPT_FLAGS" tbb_build_prefix=obj
@@ -115,6 +117,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc %{source_4}
 
 %changelog
+* Thu Jun 10 2010 Petr Machata <pmachata@redhat.com> - 2.2-2.20090809
+- Replace mfence instruction with xchg to make it run on ia32-class
+  machines without SSE2.
+- Resolves: #600654
+
 * Tue Nov  3 2009 Petr Machata <pmachata@redhat.com> - 2.2-1.20090809
 - New upstream 2.2
 - Resolves: #521571
