@@ -1,32 +1,36 @@
-%define releasedate 20090809
-%define major 2
-%define minor 2
+%define releasedate 20110419
+%define major 3
+%define minor 0
+%define dotver %{major}.%{minor}
 %define sourcebasename tbb%{major}%{minor}_%{releasedate}oss
 %define sourcefilename %{sourcebasename}_src.tgz
 
-%define source_2 Getting_Started.pdf
-%define source_3 Reference.pdf
-%define source_4 Tutorial.pdf
-
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Name: tbb
-Version: %{major}.%{minor}
-Release: 3.%{releasedate}%{?dist}
+Version: %{dotver}
+Release: 1.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 URL: http://threadingbuildingblocks.org/
-Source: http://threadingbuildingblocks.org/uploads/77/142/2.2/%{sourcefilename}
-# RPM can't handle spaces in specs, so don't include full URL.  Each
-# of the following sources was downloaded from:
-#   http://www.threadingbuildingblocks.org/uploads/81/91/Latest Open Source Documentation/
-# Unfortunately, because they regularly replace the "Latest"
-# documentation with what's actually Latest at that point, these
-# sources may no longer be available at that link.
-Source2: %{source_2}
-Source3: %{source_3}
-Source4: %{source_4}
-Patch1: tbb-2.2-20090809-cxxflags.patch
-Patch2: tbb-2.2-mfence.patch
+Source0: http://threadingbuildingblocks.org/uploads/76/169/3.0%%20update%%206/tbb30_20110419oss_src.tgz
+
+# Upstream regularly replaces the "Latest" documentation with what's
+# actually Latest at that point.  These sources may no longer match
+# what's uploaded anymore.
+%define docurl http://threadingbuildingblocks.org/uploads/81/91/Latest%%20Open%%20Source%%20Documentation/
+%define source_1 CHANGES.txt
+%define source_2 Getting_Started.pdf
+%define source_3 Reference.pdf
+%define source_4 Tutorial.pdf
+%define source_5 Design_Patterns.pdf
+Source1: %{docurl}/%{source_1}
+Source2: %{docurl}/%{source_2}
+Source3: %{docurl}/%{source_3}
+Source4: %{docurl}/%{source_4}
+Source5: %{docurl}/%{source_5}
+
+Patch1: tbb-3.0-cxxflags.patch
+Patch2: tbb-3.0-mfence.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libstdc++-devel
 # We need "arch" and "hostname" binaries:
@@ -48,7 +52,7 @@ maintenance is required as more processor cores become available.
 %package devel
 Summary: The Threading Building Blocks C++ headers and shared development libraries
 Group: Development/Libraries
-Requires: tbb = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
 Header files and shared object symlinks for the Threading Building
@@ -72,7 +76,7 @@ C++ library.
 %build
 make %{?_smp_mflags} CXXFLAGS="$RPM_OPT_FLAGS" tbb_build_prefix=obj
 
-cp -p "%{SOURCE2}" "%{SOURCE3}" "%{SOURCE4}" .
+cp -p "%{SOURCE1}" "%{SOURCE2}" "%{SOURCE3}" "%{SOURCE4}" "%{SOURCE5}" .
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -101,12 +105,12 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root,-)
-%doc COPYING
-%doc doc/Release_Notes.txt
+%doc COPYING doc/Release_Notes.txt
 %{_libdir}/*.so.2
 
 %files devel
 %defattr(-,root,root,-)
+%doc %{source_1}
 %{_includedir}/tbb
 %{_libdir}/*.so
 
@@ -115,8 +119,16 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc %{source_2}
 %doc %{source_3}
 %doc %{source_4}
+%doc %{source_5}
 
 %changelog
+* Tue Jul 26 2011 Petr Machata <pmachata@redhat.com> - 3.0-1.20110419
+- Rebase to 3.0-r6
+  - Port both patches
+  - Package Design_Patterns.pdf
+  - Thanks to Richard Shaw for initial rebase patch
+- Resolves: #723043
+
 * Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.2-3.20090809
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 

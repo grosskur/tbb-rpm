@@ -1,0 +1,20 @@
+diff -up tbb30_20110419oss/include/tbb/machine/linux_ia32.h\~ tbb30_20110419oss/include/tbb/machine/linux_ia32.h
+--- tbb30_20110419oss/include/tbb/machine/linux_ia32.h~	2011-04-19 13:48:59.000000000 +0200
++++ tbb30_20110419oss/include/tbb/machine/linux_ia32.h	2011-07-26 16:09:19.986615628 +0200
+@@ -40,7 +40,13 @@
+ #define __TBB_control_consistency_helper()
+ #define __TBB_acquire_consistency_helper() __TBB_compiler_fence()
+ #define __TBB_release_consistency_helper() __TBB_compiler_fence()
+-#define __TBB_full_memory_fence()          __asm__ __volatile__("mfence": : :"memory")
++inline void __TBB_full_memory_fence() {
++    int tmp;
++    __asm__ __volatile__("xchg %0,%0"
++			 : "=r"(tmp)
++			 : "r"(tmp)
++			 : "memory");
++}
+ 
+ #if __TBB_ICC_ASM_VOLATILE_BROKEN
+ #define __TBB_VOLATILE
+
+Diff finished.  Tue Jul 26 16:09:26 2011
