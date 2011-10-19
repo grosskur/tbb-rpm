@@ -1,5 +1,5 @@
-%define releasedate 20110419
-%define major 3
+%define releasedate 20110809
+%define major 4
 %define minor 0
 %define dotver %{major}.%{minor}
 %define sourcebasename tbb%{major}%{minor}_%{releasedate}oss
@@ -12,7 +12,7 @@ Release: 1.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 URL: http://threadingbuildingblocks.org/
-Source0: http://threadingbuildingblocks.org/uploads/76/169/3.0%%20update%%206/tbb30_20110419oss_src.tgz
+Source0: http://threadingbuildingblocks.org/uploads/77/175/4.0/tbb40_20110809oss_src.tgz
 
 # Upstream regularly replaces the "Latest" documentation with what's
 # actually Latest at that point.  These sources may no longer match
@@ -30,7 +30,7 @@ Source4: %{docurl}/%{source_4}
 Source5: %{docurl}/%{source_5}
 
 Patch1: tbb-3.0-cxxflags.patch
-Patch2: tbb-3.0-mfence.patch
+Patch2: tbb-4.0-mfence.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libstdc++-devel
 # We need "arch" and "hostname" binaries:
@@ -122,6 +122,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc %{source_5}
 
 %changelog
+* Tue Oct 18 2011 Petr Machata <pmachata@redhat.com> - 4.0-1.20110809
+- Rebase to 4.0
+  - Port the mfence patch
+  - Refresh the documentation bundle
+
 * Tue Jul 26 2011 Petr Machata <pmachata@redhat.com> - 3.0-1.20110419
 - Rebase to 3.0-r6
   - Port both patches
