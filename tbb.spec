@@ -8,7 +8,7 @@
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Name: tbb
 Version: %{dotver}
-Release: 1.%{releasedate}%{?dist}
+Release: 2.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 URL: http://threadingbuildingblocks.org/
@@ -122,6 +122,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc %{source_5}
 
 %changelog
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 4.0-2.20110809
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
 * Tue Oct 18 2011 Petr Machata <pmachata@redhat.com> - 4.0-1.20110809
 - Rebase to 4.0
   - Port the mfence patch
