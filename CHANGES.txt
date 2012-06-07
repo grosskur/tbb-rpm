@@ -1,26 +1,143 @@
+TBB 4.0 Update 4
+
+Changes (w.r.t. TBB 4.0 Update 3):
+
+- The TBB memory allocator transparently supports large pages on Linux.
+- A new flow_graph example, logic_sim, was added.
+- Support for DirectX* 9 was added to GUI examples.
+
+Community Preview Features:
+
+- Added: aggregator, a new concurrency control mechanism.
+
+Bugs fixed:
+
+- The abort operation on concurrent_bounded_queue now leaves the queue
+    in a reusable state. If a bad_alloc or bad_last_alloc exception is
+    thrown while the queue is recovering from an abort, that exception
+    will be reported instead of user_abort on the thread on which it
+    occurred, and the queue will not be reusable.
+- Steal limiting heuristic fixed to avoid premature stealing disabling
+    when large amount of __thread data is allocated on thread stack.
+- Fixed a low-probability leak of arenas in the task scheduler.
+- In STL-compatible allocator classes, the method construct() was fixed
+    to comply with C++11 requirements.
+- Fixed a bug that prevented creation of fixed-size memory pools
+    smaller than 2M.
+- Significantly reduced the amount of warnings from various compilers.
+
+Open-source contributions integrated:
+
+- Multiple improvements by Raf Schietekat.
+- Basic support for Clang on Mac OS X* by Blas Rodriguez Somoza.
+- Fixes for warnings and corner-case bugs by Blas Rodriguez Somoza
+    and Edward Lam.
+
+------------------------------------------------------------------------
+TBB 4.0 Update 3
+
+Changes (w.r.t. TBB 4.0 Update 2):
+
+- Modifications to the low-level API for memory pools:
+    added support for aligned allocations;
+    pool policies reworked to allow backward-compatible extensions;
+    added a policy to not return memory space till destruction;
+    pool_reset() does not return memory space anymore.
+- Class tbb::flow::graph_iterator added to iterate over all nodes
+    registered with a graph instance.
+- multioutput_function_node has been renamed multifunction_node.
+    multifunction_node and split_node are now fully-supported features.
+- For the tagged join node, the policy for try_put of an item with
+    already existing tag has been defined: the item will be rejected.
+- Matching the behavior on Windows, on other platforms the optional
+    shared libraries (libtbbmalloc, libirml) now are also searched
+    only in the directory where libtbb is located.
+- The platform isolation layer based on GCC built-ins is extended.
+
+Backward-incompatible API changes:
+
+- a graph reference parameter is now required to be passed to the
+    constructors of the following flow graph nodes: overwrite_node, 
+    write_once_node, broadcast_node, and the CPF or_node.
+- the following tbb::flow node methods and typedefs have been renamed:
+       Old                             New
+    join_node and or_node:
+       inputs()                 ->     input_ports()
+       input_ports_tuple_type   ->     input_ports_type
+    multifunction_node and split_node:
+       ports_type               ->     output_ports_type
+
+Bugs fixed:
+
+- Not all logical processors were utilized on systems with more than
+    64 cores split by Windows into several processor groups.
+
+------------------------------------------------------------------------
+TBB 4.0 Update 2 commercial-aligned release
+
+Changes (w.r.t. TBB 4.0 Update 1 commercial-aligned release):
+
+- concurrent_bounded_queue now has an abort() operation that releases 
+    threads involved in pending push or pop operations. The released 
+    threads will receive a tbb::user_abort exception.
+- Added Community Preview Feature:  concurrent_lru_cache container, 
+    a concurrent implementation of LRU (least-recently-used) cache.
+
+Bugs fixed:
+
+- fixed a race condition in the TBB scalable allocator.
+- concurrent_queue counter wraparound bug was fixed, which occurred when
+    the number of push and pop operations exceeded ~>4 billion on IA32.
+- fixed races in the TBB scheduler that could put workers asleep too
+    early, especially in presense of affinitized tasks.
+
+------------------------------------------------------------------------
+TBB 4.0 Update 1 commercial-aligned release
+
+Changes (w.r.t. TBB 4.0 commercial-aligned release):
+
+- Memory leaks fixed in binpack example.
+- Improvements and fixes in the TBB allocator.
+
+------------------------------------------------------------------------
 TBB 4.0 commercial-aligned release
 
 Changes (w.r.t. TBB 3.0 Update 8 commercial-aligned release):
 
-Improvements:
-- concurrent_priority_queue is now a supported feature. Capacity control methods were removed.
-- Flow graph is now a supported feature of TBB, rather than being a community preview feature.
-- A new memory backend has been implemented in the TBB allocator. It can return small memory blocks to the OS and thus later reuse that memory for large object allocation.
-- Improved partitioning algorithms for parallel_for and parallel_reduce to better handle load imbalance.
-- The convex_hull example has been refactored to produce reproducible performance results.
-- The Major Interface version has changed from 5 to 6. Deprecated interfaces might be removed in future releases.
+- concurrent_priority_queue is now a fully supported feature.
+    Capacity control methods were removed.
+- Flow graph is now a fully supported feature.
+- A new memory backend has been implemented in the TBB allocator.
+    It can reuse freed memory for both small and large objects, and
+    returns unused memory blocks to the OS more actively.
+- Improved partitioning algorithms for parallel_for and parallel_reduce
+    to better handle load imbalance.
+- The convex_hull example has been refactored for reproducible
+    performance results.
+- The major interface version has changed from 5 to 6.
+    Deprecated interfaces might be removed in future releases.
 
 Community Preview Features:
-- Added Community Preview Feature: serial subset of TBB for modeling a sequential execution of a parallel algorithm. This release introduces serial parallel_for.
-- Added Community Preview Feature: or_node (accepts multiple inputs, forwarding each input separately to successors), split_node (accepts tuples, and forwards each element to a corresponding successor), and multioutput_function_node (accepts one input, and passes the input and a tuple of output ports to the function body to support outputs to multiple successors).
-- Added Community Preview Feature: Scalable Memory Pools (more control on memory source, grouping, collective deallocatation).
+
+- Added: serial subset, i.e. sequential implementations of TBB generic
+    algorithms (currently, only provided for parallel_for).
+- Preview of new flow graph nodes:
+    or_node (accepts multiple inputs, forwards each input separately
+      to all successors),
+    split_node (accepts tuples, and forwards each element of a tuple
+      to a corresponding successor), and
+    multioutput_function_node (accepts one input, and passes the input
+    and a tuple of output ports to the function body to support outputs
+    to multiple successors).
+- Added: memory pools for more control on memory source, grouping,
+    and collective deallocation.
 
 ------------------------------------------------------------------------
 TBB 3.0 Update 8 commercial-aligned release
 
 Changes (w.r.t. TBB 3.0 Update 7 commercial-aligned release):
 
-- Task priorities has become an official feature of TBB,
+- Task priorities become an official feature of TBB,
     not community preview as before.
 - Atomics API extended, and implementation refactored.
 - Added task::set_parent() method.
@@ -37,12 +154,12 @@ Community Preview Features:
 
 - Graph community preview feature was renamed to flow graph.
     Multiple improvements in the implementation.
-    Binpack example of the feature was added.
+    Binpack example was added for the feature.
 - A number of improvements to concurrent_priority_queue.
     Shortpath example was added for the feature.
-- TBB runtime loader functionality was added (Windows*-only).
-    This allows set exact versions of TBB library to be used in run-time,
-    while setting directories for the library search.
+- TBB runtime loaded functionality was added (Windows*-only).
+    It allows to specify which versions of TBB should be used,
+    as well as to set directories for the library search.
 - parallel_deterministic_reduce template function was added.
 
 ------------------------------------------------------------------------
@@ -51,13 +168,13 @@ TBB 3.0 Update 7 commercial-aligned release
 Changes (w.r.t. TBB 3.0 Update 6 commercial-aligned release):
 
 - Added implementation of the platform isolation layer based on 
-  GCC atomic built-ins; it is supposed to work on any platform 
-  where GCC has these built-ins.
+    GCC atomic built-ins; it is supposed to work on any platform 
+    where GCC has these built-ins.
 
 Community Preview Features:
 
-- Graph's dining_philosophers example added
-- A number of improvements to graph and concurrent_priority_queue
+- Graph's dining_philosophers example added.
+- A number of improvements to graph and concurrent_priority_queue.
 
 
 ------------------------------------------------------------------------
@@ -77,11 +194,11 @@ Open-source contributions integrated:
 
 Bugs fixed:
 
-- Failure to locate Cilk runtime library to enable Cilk/TBB interop.
+- Failure to enable interoperability with Intel(R) Cilk(tm) Plus runtime
+    library, and a crash caused by invoking the interoperability layer
+    after one of the libraries was unloaded.
 - Data race that could result in concurrent_unordered_map structure
     corruption after call to clear() method.
-- Crash caused by invoking Cilk/TBB interop after one of the libraries
-    is unloaded.
 - Stack corruption caused by PIC version of 64-bit CAS compiled by Intel
     compiler on Linux.
 - Inconsistency of exception propagation mode possible when application
@@ -178,8 +295,8 @@ Changes (w.r.t. TBB 3.0 Update 1 commercial-aligned release):
 
 - Destructor of tbb::task_group class throws missing_wait exception
     if there are tasks running when it is invoked.
-- Cilk-TBB interop layer added to protect TBB TLS in case of
-    "Cilk-TBB-Cilk nesting" usage model.
+- Interoperability layer with Intel Cilk Plus runtime library added
+    to protect TBB TLS in case of nested usage with Intel Cilk Plus.
 - Compilation fix for dependent template names in concurrent_queue.
 - Memory allocator code refactored to ease development and maintenance.
 
@@ -1087,8 +1204,8 @@ Features / APIs:
 - Timers.
 
 Tools Support:
-- Thread Checker 3.0.
-- Thread Profiler 3.0.
+- Intel(R) Thread Checker 3.0.
+- Intel(R) Thread Profiler 3.0.
 
 Documentation:
 - First Use Documents: README.txt, INSTALL.txt, Release_Notes.txt,
@@ -1119,4 +1236,7 @@ Packaging:
     are provided separately on Intel(R) Premier.
 
 ------------------------------------------------------------------------
+Intel and Cilk are registered trademarks or trademarks of Intel Corporation or its
+subsidiaries in the United States and other countries.
+
 * Other names and brands may be claimed as the property of others.

@@ -1,18 +1,20 @@
-%define releasedate 20110809
+%define releasedate 20120408
 %define major 4
 %define minor 0
+%define update 4
 %define dotver %{major}.%{minor}
 %define sourcebasename tbb%{major}%{minor}_%{releasedate}oss
+
 %define sourcefilename %{sourcebasename}_src.tgz
 
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Name: tbb
 Version: %{dotver}
-Release: 3.%{releasedate}%{?dist}
+Release: 4.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 URL: http://threadingbuildingblocks.org/
-Source0: http://threadingbuildingblocks.org/uploads/77/175/4.0/tbb40_20110809oss_src.tgz
+Source0: http://threadingbuildingblocks.org/uploads/77/185/4.0%%20update%%204/tbb40_20120408oss_src.tgz
 
 # Upstream regularly replaces the "Latest" documentation with what's
 # actually Latest at that point.  These sources may no longer match
@@ -28,6 +30,11 @@ Source2: %{docurl}/%{source_2}
 Source3: %{docurl}/%{source_3}
 Source4: %{docurl}/%{source_4}
 Source5: %{docurl}/%{source_5}
+
+# These two are downstream sources.
+Source6: tbb.pc
+Source7: tbbmalloc.pc
+Source8: tbbmalloc_proxy.pc
 
 Patch1: tbb-3.0-cxxflags.patch
 Patch2: tbb-4.0-mfence.patch
@@ -75,7 +82,10 @@ C++ library.
 
 %build
 make %{?_smp_mflags} CXXFLAGS="$RPM_OPT_FLAGS" tbb_build_prefix=obj
-
+for file in %{SOURCE6} %{SOURCE7} %{SOURCE8}; do
+    sed 's/_FEDORA_VERSION/%{major}.%{minor}.%{update}/' ${file} \
+        > $(basename ${file})
+done
 cp -p "%{SOURCE1}" "%{SOURCE2}" "%{SOURCE3}" "%{SOURCE4}" "%{SOURCE5}" .
 
 %install
@@ -84,7 +94,7 @@ mkdir -p $RPM_BUILD_ROOT/%{_libdir}
 mkdir -p $RPM_BUILD_ROOT/%{_includedir}
 
 pushd build/obj_release
-    for file in libtbb{,malloc}; do
+    for file in libtbb{,malloc{,_proxy}}; do
         install -p -D -m 755 ${file}.so.2 $RPM_BUILD_ROOT/%{_libdir}
         ln -s $file.so.2 $RPM_BUILD_ROOT/%{_libdir}/$file.so
     done
@@ -95,6 +105,11 @@ pushd include
         install -p -D -m 644 {} $RPM_BUILD_ROOT/%{_includedir}/{} \
     \;
 popd
+
+for file in %{SOURCE6} %{SOURCE7} %{SOURCE8}; do
+    install -p -D -m 644 $(basename ${file}) \
+	$RPM_BUILD_ROOT/%{_libdir}/pkgconfig/$(basename ${file})
+done
 
 %post -p /sbin/ldconfig
 
@@ -113,6 +128,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc %{source_1}
 %{_includedir}/tbb
 %{_libdir}/*.so
+%{_libdir}/pkgconfig/*.pc
 
 %files doc
 %defattr(-,root,root,-)
@@ -122,6 +138,12 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc %{source_5}
 
 %changelog
+* Thu Jun  7 2012 Petr Machata <pmachata@redhat.com> - 4.0-4.20120408
+- Rebase to 4.0 update 4
+- Refresh Getting_Started.pdf, Reference.pdf, Tutorial.pdf
+- Provide pkg-config files
+- Resolves: #825402
+
 * Thu Apr 05 2012 Karsten Hopp <karsten@redhat.com> 4.0-3.20110809
 - tbb builds now on PPC(64)
 

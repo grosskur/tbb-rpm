@@ -5,7 +5,7 @@ diff -up tbb30_20110419oss/build/linux.gcc.inc\~ tbb30_20110419oss/build/linux.g
  
  ITT_NOTIFY = -DDO_ITT_NOTIFY
  ifeq ($(cfg), release)
--        CPLUS_FLAGS = $(ITT_NOTIFY) -O2 -DUSE_PTHREAD
+-        CPLUS_FLAGS = $(ITT_NOTIFY) -g -O2 -DUSE_PTHREAD
 +        CPLUS_FLAGS = $(CXXFLAGS) $(ITT_NOTIFY) -O2 -DUSE_PTHREAD
  endif
  ifeq ($(cfg), debug)
@@ -13,6 +13,6 @@ diff -up tbb30_20110419oss/build/linux.gcc.inc\~ tbb30_20110419oss/build/linux.g
 +        CPLUS_FLAGS = $(CXXFLAGS) -DTBB_USE_DEBUG $(ITT_NOTIFY) -g -O0 -DUSE_PTHREAD
  endif
  
- ifneq (0,$(cpp0x))
+ ifneq (00,$(lambdas)$(cpp0x))
 
 Diff finished.  Tue Jul 26 14:02:54 2011
