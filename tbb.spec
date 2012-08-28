@@ -10,7 +10,7 @@
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Name: tbb
 Version: %{dotver}
-Release: 5.%{releasedate}%{?dist}
+Release: 6.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 URL: http://threadingbuildingblocks.org/
@@ -38,6 +38,10 @@ Source8: tbbmalloc_proxy.pc
 
 Patch1: tbb-3.0-cxxflags.patch
 Patch2: tbb-4.0-mfence.patch
+
+# http://software.intel.com/en-us/forums/showthread.php?t=106373
+Patch3: tbb-4.0-cas.patch
+
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libstdc++-devel
 # We need "arch" and "hostname" binaries:
@@ -79,6 +83,7 @@ C++ library.
 %setup -q -n %{sourcebasename}
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 make %{?_smp_mflags} CXXFLAGS="$RPM_OPT_FLAGS" tbb_build_prefix=obj
@@ -138,6 +143,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc %{source_5}
 
 %changelog
+* Tue Aug 28 2012 Petr Machata <pmachata@redhat.com> - 4.0-6.20120408
+- Fix build on PowerPC
+
 * Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 4.0-5.20120408
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
