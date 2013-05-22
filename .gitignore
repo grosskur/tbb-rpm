@@ -7,3 +7,6 @@ Getting_Started.pdf
 tbb*/
 /tbb40_20110809oss_src.tgz
 /tbb40_20120408oss_src.tgz
+*.rpm
+/tbb41_20130314oss_src.tgz
+.*.log

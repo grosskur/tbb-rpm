@@ -1,7 +1,7 @@
-%define releasedate 20120408
+%define releasedate 20130314
 %define major 4
-%define minor 0
-%define update 4
+%define minor 1
+%define update 3
 %define dotver %{major}.%{minor}
 %define sourcebasename tbb%{major}%{minor}_%{releasedate}oss
 
@@ -10,26 +10,11 @@
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Name: tbb
 Version: %{dotver}
-Release: 7.%{releasedate}%{?dist}
+Release: 1.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 URL: http://threadingbuildingblocks.org/
-Source0: http://threadingbuildingblocks.org/uploads/77/185/4.0%%20update%%204/tbb40_20120408oss_src.tgz
-
-# Upstream regularly replaces the "Latest" documentation with what's
-# actually Latest at that point.  These sources may no longer match
-# what's uploaded anymore.
-%define docurl http://threadingbuildingblocks.org/uploads/81/91/Latest%%20Open%%20Source%%20Documentation/
-%define source_1 CHANGES.txt
-%define source_2 Getting_Started.pdf
-%define source_3 Reference.pdf
-%define source_4 Tutorial.pdf
-%define source_5 Design_Patterns.pdf
-Source1: %{docurl}/%{source_1}
-Source2: %{docurl}/%{source_2}
-Source3: %{docurl}/%{source_3}
-Source4: %{docurl}/%{source_4}
-Source5: %{docurl}/%{source_5}
+Source0: http://threadingbuildingblocks.org/sites/default/files/software_releases/source/tbb41_20130314oss_src.tgz
 
 # These two are downstream sources.
 Source6: tbb.pc
@@ -39,13 +24,8 @@ Source8: tbbmalloc_proxy.pc
 Patch1: tbb-3.0-cxxflags.patch
 Patch2: tbb-4.0-mfence.patch
 
-# http://software.intel.com/en-us/forums/showthread.php?t=106373
-Patch3: tbb-4.0-cas.patch
-
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libstdc++-devel
-# We need "arch" and "hostname" binaries:
-BuildRequires: util-linux net-tools
 ExclusiveArch: %{ix86} x86_64 ia64 ppc ppc64
 
 %description
@@ -83,7 +63,6 @@ C++ library.
 %setup -q -n %{sourcebasename}
 %patch1 -p1
 %patch2 -p1
-%patch3 -p1
 
 %build
 make %{?_smp_mflags} CXXFLAGS="$RPM_OPT_FLAGS" tbb_build_prefix=obj
@@ -91,7 +70,6 @@ for file in %{SOURCE6} %{SOURCE7} %{SOURCE8}; do
     sed 's/_FEDORA_VERSION/%{major}.%{minor}.%{update}/' ${file} \
         > $(basename ${file})
 done
-cp -p "%{SOURCE1}" "%{SOURCE2}" "%{SOURCE3}" "%{SOURCE4}" "%{SOURCE5}" .
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -130,19 +108,20 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files devel
 %defattr(-,root,root,-)
-%doc %{source_1}
+%doc CHANGES
 %{_includedir}/tbb
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/*.pc
 
 %files doc
 %defattr(-,root,root,-)
-%doc %{source_2}
-%doc %{source_3}
-%doc %{source_4}
-%doc %{source_5}
+%doc doc/Release_Notes.txt
+%doc doc/html
 
 %changelog
+* Wed May 22 2013 Petr Machata <pmachata@redhat.com> - 4.1-1.20130314
+- Rebase to 4.1 update 3
+
 * Fri Feb 15 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 4.0-7.20120408
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
