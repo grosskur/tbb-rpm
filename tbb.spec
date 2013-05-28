@@ -26,7 +26,7 @@ Patch2: tbb-4.0-mfence.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libstdc++-devel
-ExclusiveArch: %{ix86} x86_64 ia64 ppc ppc64
+ExclusiveArch: %{ix86} x86_64 ia64 ppc ppc64 %{arm}
 
 %description
 Threading Building Blocks (TBB) is a C++ runtime library that
@@ -119,6 +119,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc doc/html
 
 %changelog
+* Tue May 28 2013 Petr Machata <pmachata@redhat.com> - 4.1-3.20130314
+- Enable ARM arches
+
 * Wed May 22 2013 Petr Machata <pmachata@redhat.com> - 4.1-2.20130314
 - Fix mfence patch.  Since the __TBB_full_memory_fence macro was
   function-call-like, it stole () intended for function invocation.
