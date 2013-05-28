@@ -119,7 +119,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc doc/html
 
 %changelog
-* Wed May 22 2013 Petr Machata <pmachata@redhat.com> - 4.1-1.20130314
+* Wed May 22 2013 Petr Machata <pmachata@redhat.com> - 4.1-2.20130314
 - Fix mfence patch.  Since the __TBB_full_memory_fence macro was
   function-call-like, it stole () intended for function invocation.
 
