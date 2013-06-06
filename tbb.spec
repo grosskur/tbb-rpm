@@ -21,7 +21,13 @@ Source6: tbb.pc
 Source7: tbbmalloc.pc
 Source8: tbbmalloc_proxy.pc
 
+# Propagate CXXFLAGS variable into flags used when compiling C++.
+# This so that RPM_OPT_FLAGS are respected.
 Patch1: tbb-3.0-cxxflags.patch
+
+# Replace mfence with xchg (for 32-bit builds only) so that TBB
+# compiles and works supported hardware.  mfence was added with SSE2,
+# which we still don't assume.
 Patch2: tbb-4.0-mfence.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
