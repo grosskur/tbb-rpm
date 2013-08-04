@@ -10,7 +10,7 @@
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Name: tbb
 Version: %{dotver}
-Release: 2.%{releasedate}%{?dist}
+Release: 3.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 URL: http://threadingbuildingblocks.org/
@@ -125,6 +125,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc doc/html
 
 %changelog
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 4.1-3.20130314
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Tue May 28 2013 Petr Machata <pmachata@redhat.com> - 4.1-3.20130314
 - Enable ARM arches
 
