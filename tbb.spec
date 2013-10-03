@@ -10,7 +10,7 @@
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Name: tbb
 Version: %{dotver}
-Release: 3.%{releasedate}%{?dist}
+Release: 4.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 URL: http://threadingbuildingblocks.org/
@@ -90,7 +90,7 @@ pushd build/obj_release
 popd
 
 pushd include
-    find tbb -type f -name \*.h -exec \
+    find tbb -type f ! -name \*.htm\* -exec \
         install -p -D -m 644 {} $RPM_BUILD_ROOT/%{_includedir}/{} \
     \;
 popd
@@ -125,6 +125,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc doc/html
 
 %changelog
+* Thu Oct  3 2013 Petr Machata <pmachata@redhat.com> - 4.1-4.20130314
+- Fix %%install to also install include files that are not named *.h
+
 * Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 4.1-3.20130314
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
