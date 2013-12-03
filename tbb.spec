@@ -10,7 +10,7 @@
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Name: tbb
 Version: %{dotver}
-Release: 4.%{releasedate}%{?dist}
+Release: 5.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
 Group: Development/Tools
 URL: http://threadingbuildingblocks.org/
@@ -29,6 +29,11 @@ Patch1: tbb-3.0-cxxflags.patch
 # compiles and works supported hardware.  mfence was added with SSE2,
 # which we still don't assume.
 Patch2: tbb-4.0-mfence.patch
+
+# Don't snip -Wall from C++ flags.  Add -fno-strict-aliasing, as that
+# uncovers some static-aliasing warnings.
+# Related: https://bugzilla.redhat.com/show_bug.cgi?id=1037347
+Patch3: tbb-4.1-dont-snip-Wall.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libstdc++-devel
@@ -69,6 +74,7 @@ C++ library.
 %setup -q -n %{sourcebasename}
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 make %{?_smp_mflags} CXXFLAGS="$RPM_OPT_FLAGS" tbb_build_prefix=obj
@@ -125,6 +131,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %doc doc/html
 
 %changelog
+* Tue Dec  3 2013 Petr Machata <pmachata@redhat.com> - 4.1-5.20130314
+- Fix building with -Werror=format-security (tbb-4.1-dont-snip-Wall.patch)
+
 * Thu Oct  3 2013 Petr Machata <pmachata@redhat.com> - 4.1-4.20130314
 - Fix %%install to also install include files that are not named *.h
 

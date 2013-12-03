@@ -1,0 +1,14 @@
+diff -up tbb41_20130314oss/build/Makefile.tbbmalloc\~ tbb41_20130314oss/build/Makefile.tbbmalloc
+--- tbb41_20130314oss/build/Makefile.tbbmalloc~	2013-12-03 11:58:27.304411388 +0100
++++ tbb41_20130314oss/build/Makefile.tbbmalloc	2013-12-03 11:59:03.568650698 +0100
+@@ -51,7 +51,7 @@ include $(tbb_root)/build/common_rules.i
+ MALLOC_CPLUS.OBJ = backend.$(OBJ) large_objects.$(OBJ) backref.$(OBJ)  tbbmalloc.$(OBJ)
+ MALLOC.OBJ := $(MALLOC_CPLUS.OBJ) $(MALLOC_ASM.OBJ) itt_notify_malloc.$(OBJ) frontend.$(OBJ)
+ PROXY.OBJ := proxy.$(OBJ) tbb_function_replacement.$(OBJ)
+-M_CPLUS_FLAGS := $(subst $(WARNING_KEY),,$(M_CPLUS_FLAGS)) $(DEFINE_KEY)__TBBMALLOC_BUILD=1
++M_CPLUS_FLAGS := -fno-strict-aliasing $(M_CPLUS_FLAGS) $(DEFINE_KEY)__TBBMALLOC_BUILD=1
+ M_INCLUDES = $(INCLUDES) $(INCLUDE_KEY)$(MALLOC_ROOT) $(INCLUDE_KEY)$(MALLOC_SOURCE_ROOT)
+ 
+ # Suppress superfluous warnings for TBBmalloc compilation
+
+Diff finished.  Tue Dec  3 11:59:07 2013
