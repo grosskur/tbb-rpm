@@ -7,15 +7,15 @@
 
 %define sourcefilename %{sourcebasename}_src.tgz
 
+Name:    tbb
 Summary: The Threading Building Blocks library abstracts low-level threading details
-Name: tbb
 Version: %{dotver}
-Release: 5.%{releasedate}%{?dist}
+Release: 6.%{releasedate}%{?dist}
 License: GPLv2 with exceptions
-Group: Development/Tools
-URL: http://threadingbuildingblocks.org/
-Source0: http://threadingbuildingblocks.org/sites/default/files/software_releases/source/tbb41_20130314oss_src.tgz
+Group:   Development/Tools
+URL:     http://threadingbuildingblocks.org/
 
+Source0: http://threadingbuildingblocks.org/sites/default/files/software_releases/source/tbb41_20130314oss_src.tgz
 # These two are downstream sources.
 Source6: tbb.pc
 Source7: tbbmalloc.pc
@@ -35,9 +35,8 @@ Patch2: tbb-4.0-mfence.patch
 # Related: https://bugzilla.redhat.com/show_bug.cgi?id=1037347
 Patch3: tbb-4.1-dont-snip-Wall.patch
 
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: libstdc++-devel
-ExclusiveArch: %{ix86} x86_64 ia64 ppc ppc64 %{arm}
+ExclusiveArch: %{ix86} x86_64 ia64 ppc ppc64 %{arm} aarch64
 
 %description
 Threading Building Blocks (TBB) is a C++ runtime library that
@@ -84,7 +83,6 @@ for file in %{SOURCE6} %{SOURCE7} %{SOURCE8}; do
 done
 
 %install
-rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/%{_libdir}
 mkdir -p $RPM_BUILD_ROOT/%{_includedir}
 
@@ -110,27 +108,24 @@ done
 
 %postun -p /sbin/ldconfig
 
-%clean
-rm -rf ${RPM_BUILD_ROOT}
-
 %files
-%defattr(-,root,root,-)
 %doc COPYING doc/Release_Notes.txt
 %{_libdir}/*.so.2
 
 %files devel
-%defattr(-,root,root,-)
 %doc CHANGES
 %{_includedir}/tbb
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/*.pc
 
 %files doc
-%defattr(-,root,root,-)
 %doc doc/Release_Notes.txt
 %doc doc/html
 
 %changelog
+* Sun Jan 12 2014 Peter Robinson <pbrobinson@fedoraproject.org> 4.1-6.20130314
+- Build on aarch64, minor spec cleanups
+
 * Tue Dec  3 2013 Petr Machata <pmachata@redhat.com> - 4.1-5.20130314
 - Fix building with -Werror=format-security (tbb-4.1-dont-snip-Wall.patch)
 
