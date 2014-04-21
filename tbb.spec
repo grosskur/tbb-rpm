@@ -1,3 +1,19 @@
+%global p_vendor         hhvm
+%define _name            tbb
+
+%if 0%{?p_vendor:1}
+  %global _orig_prefix   %{_prefix}
+  %global name_prefix    %{p_vendor}-
+
+  # Use the alternate locations for things.
+  %define _lib            lib 
+  %global _real_initrddir %{_initrddir}
+  %global _sysconfdir     %{_sysconfdir}/hhvm
+  %define _prefix         /opt/hhvm
+  %define _libdir         %{_prefix}/lib
+  %define _mandir         %{_datadir}/man
+%endif
+
 %define releasedate 20130314
 %define major 4
 %define minor 1
@@ -7,10 +23,10 @@
 
 %define sourcefilename %{sourcebasename}_src.tgz
 
-Name:    tbb
+Name:    %{?name_prefix}%{_name}
 Summary: The Threading Building Blocks library abstracts low-level threading details
 Version: %{dotver}
-Release: 6.%{releasedate}%{?dist}
+Release: 6.%{releasedate}.hhvm%{?dist}
 License: GPLv2 with exceptions
 Group:   Development/Tools
 URL:     http://threadingbuildingblocks.org/
@@ -36,6 +52,8 @@ Patch2: tbb-4.0-mfence.patch
 Patch3: tbb-4.1-dont-snip-Wall.patch
 
 BuildRequires: libstdc++-devel
+# Don't provide un-namespaced libraries inside rpm database
+AutoReqProv: 0
 ExclusiveArch: %{ix86} x86_64 ia64 ppc ppc64 %{arm} aarch64
 
 %description
@@ -54,6 +72,8 @@ maintenance is required as more processor cores become available.
 Summary: The Threading Building Blocks C++ headers and shared development libraries
 Group: Development/Libraries
 Requires: %{name}%{?_isa} = %{version}-%{release}
+# Don't provide un-namespaced libraries inside rpm database
+AutoReqProv: 0
 
 %description devel
 Header files and shared object symlinks for the Threading Building
@@ -63,6 +83,8 @@ Blocks (TBB) C++ libraries.
 %package doc
 Summary: The Threading Building Blocks documentation
 Group: Documentation
+# Don't provide un-namespaced libraries inside rpm database
+AutoReqProv: 0
 
 %description doc
 PDF documentation for the user of the Threading Building Block (TBB)
